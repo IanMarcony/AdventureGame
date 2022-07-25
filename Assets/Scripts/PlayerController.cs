@@ -26,13 +26,15 @@ public class PlayerController : MonoBehaviour
 
     private bool isDoubleJump;
     private bool isJumping;
+    private GameController gameController;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        playerAnimation = GetComponent<Animator> ();
-		playerBody = GetComponent<Rigidbody2D> ();
+			playerAnimation = GetComponent<Animator> ();
+			playerBody = GetComponent<Rigidbody2D> ();
+			gameController = FindObjectOfType<GameController>() as GameController;
     }
 
     void FixedUpdate()
@@ -65,21 +67,35 @@ public class PlayerController : MonoBehaviour
                 playerBody.AddForce (new Vector2 (0,jumpForce), ForceMode2D.Impulse);
                 isDoubleJump=!isDoubleJump;
             }else if(isDoubleJump){
-                playerBody.AddForce (new Vector2 (0,jumpForce+2.0f), ForceMode2D.Impulse);
+                playerBody.AddForce (new Vector2 (0,jumpForce), ForceMode2D.Impulse);
                 isDoubleJump=!isDoubleJump;
                 idAnimation = 2;
             }
         }
 
         playerAnimation.SetBool ("grounded",grounded);
-		playerAnimation.SetInteger ("idAnimation",idAnimation);
+				playerAnimation.SetInteger ("idAnimation",idAnimation);
     }
 
 
     void flip(){
-		lookLeft = !lookLeft;//Inverte Valor da Variavel
-		float x= transform.localScale.x;
-		x *= -1;
-		transform.localScale = new Vector3 (x,transform.localScale.y,transform.localScale.z);//Altera o Scale
-	}
+			lookLeft = !lookLeft;//Inverte Valor da Variavel
+			float x= transform.localScale.x;
+			x *= -1;
+			transform.localScale = new Vector3 (x,transform.localScale.y,transform.localScale.z);//Altera o Scale
+		}
+
+		private void OnTriggerEnter2D(Collider2D other) {
+			if(other.gameObject.tag.Equals("colectable")){
+					other.gameObject.GetComponent<ItemController>().colectItem();
+			}
+		}
+
+		private void OnCollisionEnter2D(Collision2D other) {
+			 if(other.gameObject.tag.Equals("spike")){
+            Destroy(gameObject);
+						gameController.gameOver();
+        }
+		}
+		
 }
